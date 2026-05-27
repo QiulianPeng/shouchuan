@@ -1,0 +1,19 @@
+html {
+  font-family: 'Manrope', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  color: #2f1c12;
+  background: #1a0f0b;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
