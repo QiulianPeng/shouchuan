@@ -16,6 +16,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const storageDir = path.join(__dirname, '..', '.runtime')
 const storageFile = path.join(storageDir, 'prayer-log.json')
 const port = Number(process.env.PORT || 8787)
+const oracleApiKey = process.env.ORACLE_API_KEY || ''
+const oracleModel = process.env.ORACLE_MODEL || 'qwen-turbo'
+const oracleBaseUrl =
+  process.env.ORACLE_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1'
 
 async function ensureStorage() {
   if (!existsSync(storageDir)) {
@@ -88,26 +92,60 @@ function parseJsonBody(request) {
   })
 }
 
-function buildOraclePromptReply({ direction, sign, question }) {
-  const cleanQuestion = String(question || '').trim()
+async function callOracleModel({ direction, sign, question }) {
   const signLabel = sign?.label || `第${sign?.id || ''}签`
   const signLevel = sign?.level || ''
+  const signPoem = sign?.poem || ''
   const signSummary = sign?.summary || ''
   const signVision = sign?.vision || ''
 
-  if (cleanQuestion.includes('主动')) {
-    return `就这支${direction}签来看，可以主动，但要以稳为先。${signSummary}建议你先迈出一小步，再观察回应，别把主动变成催促。`
+  const systemPrompt = `你是一位温和而有智慧的签文解读者，专为用户解读求签结果。
+你会结合签文的方向、签诗、签意，用真诚、平实的语言回答用户的问题。
+回复控制在 150 字以内，语气亲切自然，不用客套开头，直接回答问题。`
+
+  const userMessage = `我求了一支「${direction}」方向的签。
+签文：${signLabel} · ${signLevel}
+签诗：${signPoem}
+签意：${signSummary}
+愿景：${signVision}
+
+我的问题是：${question}`
+
+  console.log(`[oracle] calling ${oracleModel} for direction=${direction} question="${question.slice(0, 20)}..."`)
+
+  const response = await fetch(`${oracleBaseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${oracleApiKey}`,
+    },
+    body: JSON.stringify({
+      model: oracleModel,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+      max_tokens: 300,
+      temperature: 0.8,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => '')
+    console.error(`[oracle] error status=${response.status} body=${errorText}`)
+    throw new Error(`model-request-failed:${response.status} ${errorText}`)
   }
 
-  if (cleanQuestion.includes('决定')) {
-    return `这支${direction}签更适合你先看清节奏，再决定下一步。${signSummary}如果眼前的信息还不完整，就先补齐关键判断依据。`
+  const payload = await response.json()
+  const reply = payload?.choices?.[0]?.message?.content?.trim() || ''
+
+  console.log(`[oracle] success reply="${reply.slice(0, 40)}..."`)
+
+  if (!reply) {
+    throw new Error('empty-model-reply')
   }
 
-  if (cleanQuestion.includes('祝福')) {
-    return `${signLabel}${signLevel ? `·${signLevel}` : ''}送你的今日祝福是：${signVision}。愿你此刻心里有底，脚下有路。`
-  }
-
-  return `你问的是「${cleanQuestion}」。从${signLabel}${signLevel ? `·${signLevel}` : ''}来看，这支${direction}签最想提醒你的是：${signSummary}把注意力放回当下最能推进的一件小事，反而更容易迎来你想要的回应。`
+  return reply
 }
 
 const server = http.createServer(async (request, response) => {
@@ -253,10 +291,24 @@ const server = http.createServer(async (request, response) => {
       return
     }
 
-    sendJson(response, 200, {
-      ok: true,
-      reply: buildOraclePromptReply({ direction, sign, question }),
-    })
+    if (!oracleApiKey) {
+      sendJson(response, 200, {
+        ok: true,
+        reply: `未配置解签模型 Key。签文${sign.label}·${sign.level}提醒你：${sign.summary || ''}`,
+      })
+      return
+    }
+
+    try {
+      const reply = await callOracleModel({ direction, sign, question })
+      sendJson(response, 200, { ok: true, reply })
+    } catch (error) {
+      console.error('Oracle model error:', error)
+      sendJson(response, 200, {
+        ok: true,
+        reply: `这支${direction}签（${sign.label}·${sign.level}）想提醒你：${sign.summary || '把注意力放回当下最能推进的一件小事。'}（当前 AI 解签暂不可用，以上为签文本意）`,
+      })
+    }
     return
   }
 

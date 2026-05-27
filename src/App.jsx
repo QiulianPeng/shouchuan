@@ -109,8 +109,6 @@ function App() {
   const [currentSign, setCurrentSign] = useState(null)
   const [question, setQuestion] = useState('')
   const [messages, setMessages] = useState([])
-  const [showAiConsent, setShowAiConsent] = useState(false)
-  const [hasAiConsent, setHasAiConsent] = useState(false)
   const [isAskingOracle, setIsAskingOracle] = useState(false)
   const [oracleError, setOracleError] = useState('')
 
@@ -240,24 +238,8 @@ function App() {
   }
 
   function handleOpenAiReading() {
-    if (hasAiConsent) {
-      setOracleError('')
-      setScreen('chat')
-      return
-    }
-
-    setShowAiConsent(true)
-  }
-
-  function handleConfirmAiConsent() {
-    setHasAiConsent(true)
-    setShowAiConsent(false)
     setOracleError('')
     setScreen('chat')
-  }
-
-  function handleCancelAiConsent() {
-    setShowAiConsent(false)
   }
 
   async function handleAsk(nextQuestion) {
@@ -294,7 +276,6 @@ function App() {
     setQuestion('')
     setMessages([])
     setOracleError('')
-    setShowAiConsent(false)
     setIsAskingOracle(false)
   }
 
@@ -322,14 +303,12 @@ function App() {
               >
                 <img
                   className="landing-image landing-image-full"
-                  src="/prayer-landing-arrowless.png"
+                  src="/底图.jpg"
                   alt="今日祈福封面"
                 />
                 <div className="landing-scroll-icon" aria-hidden="true">
-                  <svg className="landing-scroll-icon-svg" viewBox="0 0 24 30">
-                    <path className="landing-scroll-chevron landing-scroll-chevron-1" d="M6 12 L12 6 L18 12" />
-                    <path className="landing-scroll-chevron landing-scroll-chevron-2" d="M6 18 L12 12 L18 18" />
-                    <path className="landing-scroll-chevron landing-scroll-chevron-3" d="M6 24 L12 18 L18 24" />
+                  <svg viewBox="0 0 24 24" className="arrow-up-icon">
+                    <path d="M8 14 L12 8 L16 14 M8 10 L12 4 L16 10 M8 6 L12 0 L16 6" />
                   </svg>
                 </div>
                 <button
@@ -527,26 +506,6 @@ function App() {
           </div>
         </section>
       </main>
-
-      {showAiConsent && (
-        <div className="consent-overlay" role="presentation">
-          <div className="consent-dialog" role="dialog" aria-modal="true" aria-labelledby="ai-consent-title">
-            <span className="hero-kicker">AI 解签说明</span>
-            <h2 id="ai-consent-title">继续后才会调用你的解签模型</h2>
-            <p>
-              抽签本身始终只在本地完成。只有你接下来主动提问时，问题与当前签文内容才会发送给解签模型。
-            </p>
-            <div className="consent-actions">
-              <button type="button" className="ghost-button consent-button" onClick={handleCancelAiConsent}>
-                先看签文
-              </button>
-              <button type="button" className="primary-button consent-button" onClick={handleConfirmAiConsent}>
-                我知道了，继续解签
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
