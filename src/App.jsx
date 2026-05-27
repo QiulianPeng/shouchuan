@@ -1,81 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import './App.css'
-
-const blessingOptions = [
-  {
-    id: 'love',
-    name: '姻缘',
-    short: '缘',
-    hint: '愿有良人，心意相通',
-  },
-  {
-    id: 'career',
-    name: '事业',
-    short: '业',
-    hint: '愿步步稳进，所行有成',
-  },
-  {
-    id: 'wealth',
-    name: '财运',
-    short: '财',
-    hint: '愿财路顺遂，收支有余',
-  },
-  {
-    id: 'study',
-    name: '学业',
-    short: '学',
-    hint: '愿心无旁骛，考运稳稳',
-  },
-]
-
-const signs = [
-  {
-    id: 18,
-    level: '小吉',
-    poem: '云开月渐明，风静水初平。心中若有愿，缓行亦有成。',
-    summary: '事情正在慢慢变清晰，不必急着求一个立刻的答案。',
-    blessing: '愿你心有所定，路有所向。',
-    advice: {
-      love: '感情上适合真诚表达，但不必逼对方马上回应。温柔一点，关系会更容易靠近。',
-      career: '事业上宜稳扎稳打，把手里的事做扎实，比频繁换方向更有利。',
-      wealth: '财运宜守不宜冒进，适合整理账目、控制冲动消费。',
-      study: '学习上适合复盘旧知识，先补短板，再谈突破。',
-    },
-  },
-  {
-    id: 7,
-    level: '上吉',
-    poem: '春风入旧门，花影照前尘。若问前程事，贵在一念真。',
-    summary: '好运在靠近，但关键在于你是否真心面对自己的选择。',
-    blessing: '愿你所念真诚，所遇皆暖。',
-    advice: {
-      love: '感情有转暖之象，适合主动释放善意，但不要用试探代替沟通。',
-      career: '事业上有新机会出现，适合展示能力，也适合争取资源。',
-      wealth: '财运有起色，但要分清机会和诱惑，别被短期收益冲昏头。',
-      study: '学业状态回升，适合定一个清晰目标，坚持几天就能看到变化。',
-    },
-  },
-  {
-    id: 32,
-    level: '中平',
-    poem: '山路多回转，行人莫问迟。灯火三更后，方知月满时。',
-    summary: '现在不是最快的时候，但每一步都在累积后劲。',
-    blessing: '愿你慢慢走，也终能抵达。',
-    advice: {
-      love: '感情上不要急着定输赢，先看对方的实际行动，也看自己的真实感受。',
-      career: '事业上会有反复，但不代表方向错了，适合耐心推进。',
-      wealth: '财务上以稳为主，不适合高风险尝试。',
-      study: '学习会经历瓶颈，换个方法或找人请教，会比硬扛更有效。',
-    },
-  },
-]
-
-const quickQuestions = [
-  '这签是什么意思？',
-  '我最近该主动一点吗？',
-  '这件事适合现在决定吗？',
-  '给我一句今日祝福',
-]
+import {
+  blessingOptions,
+  demoTagFallback,
+  fortuneSignsByOption,
+  quickQuestions,
+} from './data/fortuneSigns'
 
 const bambooSticks = [
   { left: 18, top: 22, height: 84, tilt: -12, delay: 0 },
@@ -92,12 +22,8 @@ const bambooSticks = [
   { left: 70, top: 52, height: 84, tilt: 9, delay: 0.26 },
 ]
 
-const demoTagFallback = {
-  tagId: 'mala-demo-001',
-  series: '平安手串',
-  temple: '静心祈福',
-  blessingType: 'career',
-}
+const modelEndpoint = import.meta.env.VITE_ORACLE_MODEL_URL?.trim() || ''
+const modelKey = import.meta.env.VITE_ORACLE_MODEL_KEY?.trim() || ''
 
 function parseTagProfile() {
   if (typeof window === 'undefined') {
@@ -120,32 +46,53 @@ function parseTagProfile() {
   }
 }
 
-function buildReply(question, sign, option) {
-  const text = question.trim()
-  const advice = sign.advice[option.id]
-
-  if (text.includes('主动')) {
-    return `${option.name}这件事可以主动一点，但主动不是催促。${advice}`
-  }
-
-  if (text.includes('决定')) {
-    return `现在做决定之前，先看一眼自己最在意的结果。${sign.summary}${advice}`
-  }
-
-  if (text.includes('祝福')) {
-    return `${sign.blessing}今天在「${option.name}」这件事上，记得先把自己安顿好。`
-  }
-
-  return `这支签更像是在提醒你：${sign.summary}${advice}不用急着求一个绝对答案，先做一件当下能推进的小事。${sign.blessing}`
+function createIntroMessage(sign, option) {
+  return `你今天抽到${sign.label}，${sign.level}。这支${option.name}签提醒你：${sign.summary}`
 }
 
-async function readJson(url, options = {}) {
-  const response = await fetch(url, options)
-  if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`)
+function createFallbackErrorMessage() {
+  return '当前 AI 解签暂不可用，请稍后再试。'
+}
+
+async function requestOracleReply({ option, sign, question }) {
+  if (!modelEndpoint) {
+    throw new Error('missing-model-endpoint')
   }
 
-  return response.json()
+  const response = await fetch(modelEndpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(modelKey ? { Authorization: `Bearer ${modelKey}` } : {}),
+    },
+    body: JSON.stringify({
+      direction: option.name,
+      sign: {
+        id: sign.id,
+        label: sign.label,
+        direction: sign.direction,
+        level: sign.level,
+        attribute: sign.attribute,
+        poem: sign.poem,
+        summary: sign.summary,
+        vision: sign.vision,
+      },
+      question,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`model-request-failed:${response.status}`)
+  }
+
+  const payload = await response.json()
+  const reply = typeof payload?.reply === 'string' ? payload.reply.trim() : ''
+
+  if (!reply) {
+    throw new Error('empty-model-reply')
+  }
+
+  return reply
 }
 
 function App() {
@@ -161,67 +108,11 @@ function App() {
   const [drawnSign, setDrawnSign] = useState(null)
   const [currentSign, setCurrentSign] = useState(null)
   const [question, setQuestion] = useState('')
-  const [messages, setMessages] = useState([
-    {
-      role: 'ai',
-      text: '抽到签后，你可以继续问我这签是什么意思、最近该怎么做，或者想要一句今日祝福。',
-    },
-  ])
-  const [apiMode, setApiMode] = useState('checking')
-  const [visitId, setVisitId] = useState(null)
-
-  useEffect(() => {
-    setSelectedOption(initialOption)
-  }, [initialOption])
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function bootstrapSession() {
-      try {
-        const health = await readJson('/api/health')
-        if (cancelled) {
-          return
-        }
-
-        setApiMode(health.ok ? 'live' : 'fallback')
-
-        if (!health.ok) {
-          return
-        }
-
-        const session = await readJson('/api/session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            source: tagProfile.isDemo ? 'demo-entry' : 'nfc-entry',
-            userAgent: navigator.userAgent,
-            tagProfile,
-          }),
-        })
-
-        if (cancelled) {
-          return
-        }
-
-        setVisitId(session.visitId || null)
-      } catch {
-        if (cancelled) {
-          return
-        }
-
-        setApiMode('fallback')
-      }
-    }
-
-    bootstrapSession()
-
-    return () => {
-      cancelled = true
-    }
-  }, [tagProfile])
-
-  const currentAdvice = currentSign ? currentSign.advice[selectedOption.id] : ''
+  const [messages, setMessages] = useState([])
+  const [showAiConsent, setShowAiConsent] = useState(false)
+  const [hasAiConsent, setHasAiConsent] = useState(false)
+  const [isAskingOracle, setIsAskingOracle] = useState(false)
+  const [oracleError, setOracleError] = useState('')
 
   function handleEnterBlessing() {
     setScreen('home')
@@ -315,6 +206,11 @@ function App() {
     touchStartY.current = null
   }
 
+  function pickRandomSign(optionId) {
+    const signPool = fortuneSignsByOption[optionId] || fortuneSignsByOption.career
+    return signPool[Math.floor(Math.random() * signPool.length)]
+  }
+
   async function handleDrawSign() {
     if (isDrawing) {
       return
@@ -324,79 +220,70 @@ function App() {
     setDrawnSign(null)
     playBambooRattle()
 
-    try {
-      let sign
-      let drawMessage = ''
+    const sign = pickRandomSign(selectedOption.id)
 
-      if (apiMode === 'live') {
-        const result = await readJson('/api/draw', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            visitId,
-            blessingType: selectedOption.id,
-            tagProfile,
-          }),
-        })
+    window.setTimeout(() => {
+      setDrawnSign(sign)
+    }, 820)
 
-        sign = result.sign
-        drawMessage = result.message
-      } else {
-        sign = signs[Math.floor(Math.random() * signs.length)]
-        drawMessage = `你今日抽到第 ${sign.id} 签，${sign.level}。${sign.summary}你可以继续问我，我会结合「${selectedOption.name}」方向为你解签。`
-      }
+    window.setTimeout(() => {
+      setCurrentSign(sign)
+      setOracleError('')
+      setMessages([{ role: 'ai', text: createIntroMessage(sign, selectedOption) }])
+      setScreen('result')
+    }, 1520)
 
-      window.setTimeout(() => {
-        setDrawnSign(sign)
-      }, 820)
+    window.setTimeout(() => {
+      setIsDrawing(false)
+      setDrawnSign(null)
+    }, 1520)
+  }
 
-      window.setTimeout(() => {
-        setCurrentSign(sign)
-        setMessages([{ role: 'ai', text: drawMessage }])
-        setScreen('result')
-      }, 1520)
-    } finally {
-      window.setTimeout(() => {
-        setIsDrawing(false)
-        setDrawnSign(null)
-      }, 1520)
+  function handleOpenAiReading() {
+    if (hasAiConsent) {
+      setOracleError('')
+      setScreen('chat')
+      return
     }
+
+    setShowAiConsent(true)
+  }
+
+  function handleConfirmAiConsent() {
+    setHasAiConsent(true)
+    setShowAiConsent(false)
+    setOracleError('')
+    setScreen('chat')
+  }
+
+  function handleCancelAiConsent() {
+    setShowAiConsent(false)
   }
 
   async function handleAsk(nextQuestion) {
     const content = (nextQuestion || question).trim()
-    if (!content || !currentSign) {
+    if (!content || !currentSign || isAskingOracle) {
       return
     }
 
     setMessages((current) => [...current, { role: 'user', text: content }])
     setQuestion('')
+    setOracleError('')
+    setIsAskingOracle(true)
 
     try {
-      if (apiMode === 'live') {
-        const result = await readJson('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            visitId,
-            tagProfile,
-            blessingType: selectedOption.id,
-            signId: currentSign.id,
-            question: content,
-          }),
-        })
+      const reply = await requestOracleReply({
+        option: selectedOption,
+        sign: currentSign,
+        question: content,
+      })
 
-        setMessages((current) => [...current, { role: 'ai', text: result.reply }])
-        return
-      }
+      setMessages((current) => [...current, { role: 'ai', text: reply }])
     } catch {
-      setApiMode('fallback')
+      setOracleError(createFallbackErrorMessage())
+    } finally {
+      setIsAskingOracle(false)
     }
-
-    setMessages((current) => [
-      ...current,
-      { role: 'ai', text: buildReply(content, currentSign, selectedOption) },
-    ])
   }
 
   function handleRestart() {
@@ -405,12 +292,10 @@ function App() {
     setDrawnSign(null)
     setIsDrawing(false)
     setQuestion('')
-    setMessages([
-      {
-        role: 'ai',
-        text: '抽到签后，你可以继续问我这签是什么意思、最近该怎么做，或者想要一句今日祝福。',
-      },
-    ])
+    setMessages([])
+    setOracleError('')
+    setShowAiConsent(false)
+    setIsAskingOracle(false)
   }
 
   return (
@@ -522,7 +407,7 @@ function App() {
 
                     {drawnSign && (
                       <div className="drawn-slip" aria-hidden="true">
-                        <span>第 {drawnSign.id} 签</span>
+                        <span>{drawnSign.label}</span>
                       </div>
                     )}
                   </div>
@@ -549,20 +434,23 @@ function App() {
                 <section className="sign-header">
                   <span className="hero-kicker">今日灵签 · {selectedOption.name}</span>
                   <h2>
-                    第 {currentSign.id} 签 · {currentSign.level}
+                    {currentSign.label} · {currentSign.level}
                   </h2>
+                  <p className="sign-subhead">{currentSign.attribute}</p>
                   <p className="poem-block">{currentSign.poem}</p>
                 </section>
 
                 <section className="reading-card">
                   <span className="route-label">今日签意</span>
                   <p>{currentSign.summary}</p>
-                  <div className="advice-card">{currentAdvice}</div>
-                  <strong>{currentSign.blessing}</strong>
+                  <div className="advice-card">
+                    <span className="route-label">核心愿景</span>
+                    <strong>{currentSign.vision}</strong>
+                  </div>
                 </section>
 
                 <div className="action-stack">
-                  <button type="button" className="primary-button" onClick={() => setScreen('chat')}>
+                  <button type="button" className="primary-button" onClick={handleOpenAiReading}>
                     继续 AI 解签
                   </button>
                   <button type="button" className="ghost-button" onClick={handleRestart}>
@@ -577,9 +465,9 @@ function App() {
                 <section className="hero-block hero-block-compact">
                   <span className="hero-kicker">AI 解签</span>
                   <h2>
-                    第 {currentSign.id} 签 · {currentSign.level}
+                    {currentSign.label} · {currentSign.level}
                   </h2>
-                  <p>你也可以继续追问这支签对今天的提醒。</p>
+                  <p>只有你主动提问时，问题才会发送给解签模型。</p>
                 </section>
 
                 <div className="quick-question-row">
@@ -589,11 +477,14 @@ function App() {
                       type="button"
                       className="quick-question"
                       onClick={() => handleAsk(item)}
+                      disabled={isAskingOracle}
                     >
                       {item}
                     </button>
                   ))}
                 </div>
+
+                {oracleError && <div className="status-banner status-banner-error">{oracleError}</div>}
 
                 <div className="chat-log">
                   {messages.map((message, index) => (
@@ -608,6 +499,12 @@ function App() {
                       </div>
                     </div>
                   ))}
+
+                  {isAskingOracle && (
+                    <div className="chat-bubble-row">
+                      <div className="chat-bubble chat-bubble-ai">正在请解签模型细看这一签...</div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="chat-composer">
@@ -615,9 +512,10 @@ function App() {
                     value={question}
                     onChange={(event) => setQuestion(event.target.value)}
                     placeholder="问问这支签想提醒你什么..."
+                    disabled={isAskingOracle}
                   />
-                  <button type="button" onClick={() => handleAsk()}>
-                    发送
+                  <button type="button" onClick={() => handleAsk()} disabled={isAskingOracle}>
+                    {isAskingOracle ? '发送中' : '发送'}
                   </button>
                 </div>
 
@@ -629,6 +527,26 @@ function App() {
           </div>
         </section>
       </main>
+
+      {showAiConsent && (
+        <div className="consent-overlay" role="presentation">
+          <div className="consent-dialog" role="dialog" aria-modal="true" aria-labelledby="ai-consent-title">
+            <span className="hero-kicker">AI 解签说明</span>
+            <h2 id="ai-consent-title">继续后才会调用你的解签模型</h2>
+            <p>
+              抽签本身始终只在本地完成。只有你接下来主动提问时，问题与当前签文内容才会发送给解签模型。
+            </p>
+            <div className="consent-actions">
+              <button type="button" className="ghost-button consent-button" onClick={handleCancelAiConsent}>
+                先看签文
+              </button>
+              <button type="button" className="primary-button consent-button" onClick={handleConfirmAiConsent}>
+                我知道了，继续解签
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

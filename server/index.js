@@ -88,6 +88,28 @@ function parseJsonBody(request) {
   })
 }
 
+function buildOraclePromptReply({ direction, sign, question }) {
+  const cleanQuestion = String(question || '').trim()
+  const signLabel = sign?.label || `第${sign?.id || ''}签`
+  const signLevel = sign?.level || ''
+  const signSummary = sign?.summary || ''
+  const signVision = sign?.vision || ''
+
+  if (cleanQuestion.includes('主动')) {
+    return `就这支${direction}签来看，可以主动，但要以稳为先。${signSummary}建议你先迈出一小步，再观察回应，别把主动变成催促。`
+  }
+
+  if (cleanQuestion.includes('决定')) {
+    return `这支${direction}签更适合你先看清节奏，再决定下一步。${signSummary}如果眼前的信息还不完整，就先补齐关键判断依据。`
+  }
+
+  if (cleanQuestion.includes('祝福')) {
+    return `${signLabel}${signLevel ? `·${signLevel}` : ''}送你的今日祝福是：${signVision}。愿你此刻心里有底，脚下有路。`
+  }
+
+  return `你问的是「${cleanQuestion}」。从${signLabel}${signLevel ? `·${signLevel}` : ''}来看，这支${direction}签最想提醒你的是：${signSummary}把注意力放回当下最能推进的一件小事，反而更容易迎来你想要的回应。`
+}
+
 const server = http.createServer(async (request, response) => {
   if (!request.url) {
     sendJson(response, 400, { error: 'Missing request URL.' })
@@ -211,6 +233,29 @@ const server = http.createServer(async (request, response) => {
     sendJson(response, 200, {
       ok: true,
       reply,
+    })
+    return
+  }
+
+  if (request.method === 'POST' && url.pathname === '/api/oracle/reply') {
+    const body = await parseJsonBody(request).catch(() => null)
+    if (!body) {
+      sendJson(response, 400, { error: 'Invalid JSON body.' })
+      return
+    }
+
+    const direction = String(body.direction || '').trim()
+    const sign = body.sign || {}
+    const question = String(body.question || '').trim()
+
+    if (!direction || !sign || !question) {
+      sendJson(response, 400, { error: 'Missing direction, sign, or question.' })
+      return
+    }
+
+    sendJson(response, 200, {
+      ok: true,
+      reply: buildOraclePromptReply({ direction, sign, question }),
     })
     return
   }
