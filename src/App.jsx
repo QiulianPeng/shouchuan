@@ -22,8 +22,11 @@ const bambooSticks = [
   { left: 70, top: 52, height: 84, tilt: 9, delay: 0.26 },
 ]
 
-const modelEndpoint = import.meta.env.VITE_ORACLE_MODEL_URL?.trim() || ''
-const modelKey = import.meta.env.VITE_ORACLE_MODEL_KEY?.trim() || ''
+const isProduction = import.meta.env.PROD
+const modelEndpoint = isProduction
+  ? '/api/fortune'
+  : import.meta.env.VITE_ORACLE_MODEL_URL?.trim() || ''
+const modelKey = isProduction ? '' : import.meta.env.VITE_ORACLE_MODEL_KEY?.trim() || ''
 
 function parseTagProfile() {
   if (typeof window === 'undefined') {
@@ -481,7 +484,7 @@ function App() {
 
                   {isAskingOracle && (
                     <div className="chat-bubble-row">
-                      <div className="chat-bubble chat-bubble-ai">正在请解签模型细看这一签...</div>
+                      <div className="chat-bubble chat-bubble-ai">正在请解签大师细看这一签...</div>
                     </div>
                   )}
                 </div>
