@@ -757,7 +757,7 @@ button {
   }
 
   .blessing-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .phone-card {
@@ -765,13 +765,18 @@ button {
   }
 
   .screen {
-    min-height: 760px;
+    min-height: 100dvh;
     padding: 20px 18px 22px;
+  }
+
+  .landing-image {
+    height: 100dvh;
   }
 
   .scroll-entry-screen,
   .landing-image-full {
-    min-height: 760px;
+    min-height: 100dvh;
+    height: 100dvh;
   }
 
   .landing-scroll-icon {
