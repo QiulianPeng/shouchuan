@@ -449,7 +449,7 @@ function App() {
                   <h2>
                     {currentSign.label} · {currentSign.level}
                   </h2>
-                  <p>只有你主动提问时，问题才会发送给解签模型。</p>
+
                 </section>
 
                 <div className="quick-question-row">
