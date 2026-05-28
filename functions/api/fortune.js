@@ -74,8 +74,15 @@ export async function onRequest(context) {
     return new Response(null, { status: 204, headers: corsHeaders() })
   }
 
+  if (request.method === 'GET') {
+    return new Response(JSON.stringify({ ok: true, method: 'GET', hasKey: !!env.DASHSCOPE_API_KEY }), {
+      status: 200,
+      headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+    })
+  }
+
   if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+    return new Response(JSON.stringify({ error: 'Method not allowed', method: request.method }), {
       status: 405,
       headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
     })
