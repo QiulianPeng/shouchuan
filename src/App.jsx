@@ -264,8 +264,8 @@ function App() {
       })
 
       setMessages((current) => [...current, { role: 'ai', text: reply }])
-    } catch {
-      setOracleError(createFallbackErrorMessage())
+    } catch (err) {
+      setOracleError(createFallbackErrorMessage() + ' (' + (err?.message || '未知错误') + ')')
     } finally {
       setIsAskingOracle(false)
     }
