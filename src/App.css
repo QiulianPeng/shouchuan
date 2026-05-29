@@ -811,6 +811,9 @@ button {
     border-radius: 0;
     border: none;
     box-shadow: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   @supports (min-height: 100dvh) {
@@ -822,10 +825,9 @@ button {
   .screen {
     min-height: 100dvh;
     min-height: 100vh;
-    height: 100%;
     padding: 16px 14px 20px;
     padding-top: calc(16px + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
   }
 
   @supports (min-height: 100dvh) {
@@ -887,10 +889,23 @@ button {
   }
 
   /* ---- 选择方向 ---- */
+  .blessing-screen {
+    justify-content: flex-start;
+  }
+
+  .blessing-hero h2 {
+    font-size: 1.65rem;
+  }
+
+  .blessing-hero p {
+    font-size: 0.95rem;
+  }
+
   .blessing-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    margin-top: 24px;
+    gap: 12px;
+    margin-top: 28px;
+    margin-bottom: 28px;
   }
 
   .blessing-card {
@@ -922,7 +937,11 @@ button {
   }
 
   .hero-block-compact h2 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
+  }
+
+  .hero-block-compact .hero-kicker {
+    font-size: 0.65rem;
   }
 
   /* ---- 抽签 ---- */
@@ -931,61 +950,95 @@ button {
   }
 
   .draw-stage-panel {
-    min-height: 340px;
-    margin-top: 8px;
+    min-height: 280px;
+    margin-top: 4px;
+  }
+
+  .draw-action-stack {
+    margin-top: 16px;
+    padding-bottom: 8px;
   }
 
   .oracle-vessel {
-    width: 200px;
-    height: 300px;
+    width: 180px;
+    height: 260px;
   }
 
   .bamboo-tube {
-    width: 150px;
-    height: 210px;
+    width: 130px;
+    height: 180px;
     top: 44px;
   }
 
   .bamboo-tube-label {
-    width: 72px;
-    height: 72px;
-    font-size: 1.6rem;
-    border-radius: 22px;
+    width: 62px;
+    height: 62px;
+    font-size: 1.4rem;
+    border-radius: 18px;
   }
 
   .bamboo-tube-rim {
-    width: 96px;
-    height: 22px;
+    width: 80px;
+    height: 20px;
+    top: 16px;
   }
 
   /* ---- 签文结果 ---- */
+  .sign-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .sign-subhead {
+    margin-top: 6px;
+    font-size: 0.85rem;
+  }
+
   .poem-block {
-    padding: 16px;
-    border-radius: 22px;
-    font-size: 1.15rem;
+    padding: 14px;
+    border-radius: 18px;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-top: 12px;
   }
 
   .reading-card {
-    margin-top: 16px;
-    padding: 14px;
-    border-radius: 20px;
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .reading-card .route-label {
+    font-size: 0.7rem;
+  }
+
+  .reading-card p {
+    font-size: 0.9rem;
+    line-height: 1.6;
   }
 
   .advice-card {
-    margin: 12px 0;
-    padding: 12px;
+    margin: 10px 0;
+    padding: 10px;
     border-radius: 14px;
+  }
+
+  .advice-card strong {
+    font-size: 0.95rem;
+  }
+
+  .action-stack {
+    margin-top: 16px;
   }
 
   /* ---- 快捷问题 ---- */
   .quick-question-row {
-    gap: 8px;
-    margin-top: 14px;
+    gap: 6px;
+    margin-top: 10px;
   }
 
   .quick-question {
-    padding: 8px 12px;
-    font-size: 0.85rem;
+    padding: 6px 10px;
+    font-size: 0.8rem;
   }
 
   /* ---- 聊天 ---- */
@@ -993,31 +1046,40 @@ button {
     flex: 1;
     min-height: 0;
     max-height: none;
-    gap: 10px;
+    gap: 8px;
   }
 
   .chat-bubble {
-    padding: 12px 14px;
-    border-radius: 16px;
-    font-size: 0.9rem;
+    padding: 10px 12px;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    max-width: 88%;
   }
 
   .chat-composer {
     gap: 8px;
-    margin-top: 14px;
+    margin-top: 10px;
+    margin-bottom: 4px;
   }
 
   .chat-composer input {
-    min-height: 46px;
+    min-height: 42px;
     padding: 0 12px;
     border-radius: 14px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
 
   .chat-composer button {
-    min-width: 68px;
+    min-width: 60px;
     border-radius: 14px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+  }
+
+  .ghost-button.align-left {
+    margin-top: 8px;
+    min-height: 40px;
+    font-size: 0.85rem;
   }
 
   /* ---- 按钮 ---- */
