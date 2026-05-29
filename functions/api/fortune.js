@@ -1,6 +1,6 @@
 async function callOracleModel({ direction, sign, question }, env) {
   const oracleApiKey = env.DASHSCOPE_API_KEY || ''
-  const oracleModel = env.DASHSCOPE_MODEL || 'qwen-turbo'
+  const oracleModel = env.DASHSCOPE_MODEL || 'qwen3.6-plus'
   const oracleBaseUrl =
     env.DASHSCOPE_BASE_URL || 'https://api-token.zhongzhiyou.cn/api/v1'
 

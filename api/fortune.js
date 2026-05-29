@@ -1,5 +1,5 @@
 const oracleApiKey = process.env.DASHSCOPE_API_KEY || ''
-const oracleModel = process.env.DASHSCOPE_MODEL || 'qwen-turbo'
+const oracleModel = process.env.DASHSCOPE_MODEL || 'qwen3.6-plus'
 const oracleBaseUrl =
   process.env.DASHSCOPE_BASE_URL || 'https://api-token.zhongzhiyou.cn/api/v1'
 

@@ -17,7 +17,7 @@ const storageDir = path.join(__dirname, '..', '.runtime')
 const storageFile = path.join(storageDir, 'prayer-log.json')
 const port = Number(process.env.PORT || 8787)
 const oracleApiKey = process.env.ORACLE_API_KEY || ''
-const oracleModel = process.env.ORACLE_MODEL || 'qwen-turbo'
+const oracleModel = process.env.ORACLE_MODEL || 'qwen3.6-plus'
 const oracleBaseUrl =
   process.env.ORACLE_BASE_URL || 'https://api-token.zhongzhiyou.cn/api/v1'
 
