@@ -239,7 +239,8 @@ button {
 }
 
 .blessing-screen {
-  justify-content: center;
+  justify-content: flex-start;
+  padding-top: 14px;
 }
 
 .blessing-hero {
@@ -267,7 +268,7 @@ button {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
-  margin-top: 34px;
+  margin-top: 62px;
 }
 
 .blessing-card {
@@ -326,6 +327,10 @@ button {
   min-height: 56px;
   border-radius: 18px;
   transition: transform 180ms ease, filter 180ms ease;
+}
+
+.blessing-screen .primary-button {
+  margin-top: 98px;
 }
 
 .primary-button:hover,
@@ -528,11 +533,23 @@ button {
   padding: 6px 0 0;
 }
 
+.sign-header .hero-kicker {
+  margin-bottom: 8px;
+}
+
+.sign-header h2 {
+  margin-bottom: 8px;
+}
+
 .sign-subhead {
   margin-top: 12px;
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-soft);
+}
+
+.sign-header .poem-block {
+  margin-top: 26px;
 }
 
 .poem-block {
@@ -606,12 +623,14 @@ button {
   padding-right: 4px;
   min-height: 320px;
   max-height: 360px;
+  align-content: start;
   overflow: auto;
 }
 
 .chat-bubble-row {
   display: flex;
   justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .chat-bubble-row-user {
@@ -620,6 +639,7 @@ button {
 
 .chat-bubble {
   max-width: 84%;
+  width: fit-content;
   padding: 14px 16px;
   border-radius: 20px;
   line-height: 1.7;
@@ -635,11 +655,14 @@ button {
   color: #fff3dc;
 }
 
+.chat-footer {
+  margin-top: 18px;
+}
+
 .chat-composer {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 10px;
-  margin-top: 18px;
 }
 
 .chat-composer input {
@@ -816,6 +839,12 @@ button {
     -webkit-overflow-scrolling: touch;
   }
 
+  .phone-card-chat {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
   @supports (min-height: 100dvh) {
     .phone-card {
       min-height: 100dvh;
@@ -904,8 +933,8 @@ button {
   .blessing-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
-    margin-top: 28px;
-    margin-bottom: 28px;
+    margin-top: 42px;
+    margin-bottom: 24px;
   }
 
   .blessing-card {
@@ -989,22 +1018,25 @@ button {
   }
 
   .sign-subhead {
-    margin-top: 6px;
+    margin-top: 10px;
     font-size: 0.85rem;
   }
 
+  .sign-header .poem-block {
+    margin-top: 22px;
+  }
+
   .poem-block {
-    padding: 14px;
-    border-radius: 18px;
+    padding: 18px 16px;
+    border-radius: 20px;
     font-size: 1.05rem;
-    line-height: 1.7;
-    margin-top: 12px;
+    line-height: 1.85;
   }
 
   .reading-card {
-    margin-top: 12px;
-    padding: 12px;
-    border-radius: 18px;
+    margin-top: 22px;
+    padding: 16px;
+    border-radius: 22px;
   }
 
   .reading-card .route-label {
@@ -1013,13 +1045,13 @@ button {
 
   .reading-card p {
     font-size: 0.9rem;
-    line-height: 1.6;
+    line-height: 1.75;
   }
 
   .advice-card {
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 14px;
+    margin: 16px 0 0;
+    padding: 16px 14px;
+    border-radius: 18px;
   }
 
   .advice-card strong {
@@ -1027,7 +1059,7 @@ button {
   }
 
   .action-stack {
-    margin-top: 16px;
+    margin-top: 26px;
   }
 
   /* ---- 快捷问题 ---- */
@@ -1047,9 +1079,17 @@ button {
     min-height: 0;
     max-height: none;
     gap: 8px;
+    align-content: start;
+    overflow: auto;
+    padding-bottom: 16px;
+  }
+
+  .chat-bubble-row {
+    align-items: flex-start;
   }
 
   .chat-bubble {
+    width: fit-content;
     padding: 10px 12px;
     border-radius: 14px;
     font-size: 0.85rem;
@@ -1057,10 +1097,27 @@ button {
     max-width: 88%;
   }
 
+  .chat-screen {
+    flex: 1;
+    min-height: 0;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
+  }
+
+  .chat-footer {
+    margin-top: auto;
+    position: sticky;
+    bottom: 10px;
+    z-index: 3;
+    display: grid;
+    gap: 8px;
+    padding-top: 2px;
+    padding-bottom: 0;
+    background: transparent;
+  }
+
   .chat-composer {
     gap: 8px;
-    margin-top: 10px;
-    margin-bottom: 4px;
   }
 
   .chat-composer input {
@@ -1077,7 +1134,7 @@ button {
   }
 
   .ghost-button.align-left {
-    margin-top: 8px;
+    margin-top: 0;
     min-height: 40px;
     font-size: 0.85rem;
   }

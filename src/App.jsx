@@ -287,7 +287,7 @@ function App() {
       <main className="experience-shell">
         <section className="phone-stage">
           <div className="phone-glow" />
-          <div className="phone-card">
+          <div className={`phone-card ${screen === 'chat' ? 'phone-card-chat' : ''}`}>
             {screen !== 'landing' && (
               <div className="card-topbar">
                 <div>
@@ -443,7 +443,7 @@ function App() {
             )}
 
             {screen === 'chat' && currentSign && (
-              <div className="screen">
+              <div className="screen chat-screen">
                 <section className="hero-block hero-block-compact">
                   <span className="hero-kicker">AI 解签</span>
                   <h2>
@@ -489,21 +489,23 @@ function App() {
                   )}
                 </div>
 
-                <div className="chat-composer">
-                  <input
-                    value={question}
-                    onChange={(event) => setQuestion(event.target.value)}
-                    placeholder="问问这支签想提醒你什么..."
-                    disabled={isAskingOracle}
-                  />
-                  <button type="button" onClick={() => handleAsk()} disabled={isAskingOracle}>
-                    {isAskingOracle ? '发送中' : '发送'}
+                <div className="chat-footer">
+                  <div className="chat-composer">
+                    <input
+                      value={question}
+                      onChange={(event) => setQuestion(event.target.value)}
+                      placeholder="问问这支签想提醒你什么..."
+                      disabled={isAskingOracle}
+                    />
+                    <button type="button" onClick={() => handleAsk()} disabled={isAskingOracle}>
+                      {isAskingOracle ? '发送中' : '发送'}
+                    </button>
+                  </div>
+
+                  <button type="button" className="ghost-button align-left" onClick={() => setScreen('result')}>
+                    返回签文
                   </button>
                 </div>
-
-                <button type="button" className="ghost-button align-left" onClick={() => setScreen('result')}>
-                  返回签文
-                </button>
               </div>
             )}
           </div>
