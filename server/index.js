@@ -19,7 +19,7 @@ const port = Number(process.env.PORT || 8787)
 const oracleApiKey = process.env.ORACLE_API_KEY || ''
 const oracleModel = process.env.ORACLE_MODEL || 'qwen-turbo'
 const oracleBaseUrl =
-  process.env.ORACLE_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+  process.env.ORACLE_BASE_URL || 'https://api-token.zhongzhiyou.cn/api/v1'
 
 async function ensureStorage() {
   if (!existsSync(storageDir)) {

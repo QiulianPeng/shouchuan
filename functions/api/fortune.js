@@ -2,7 +2,7 @@ async function callOracleModel({ direction, sign, question }, env) {
   const oracleApiKey = env.DASHSCOPE_API_KEY || ''
   const oracleModel = env.DASHSCOPE_MODEL || 'qwen-turbo'
   const oracleBaseUrl =
-    env.DASHSCOPE_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+    env.DASHSCOPE_BASE_URL || 'https://api-token.zhongzhiyou.cn/api/v1'
 
   const signLabel = sign?.label || `第${sign?.id || ''}签`
   const signLevel = sign?.level || ''

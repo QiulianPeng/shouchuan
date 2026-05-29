@@ -1,7 +1,7 @@
 const oracleApiKey = process.env.DASHSCOPE_API_KEY || ''
 const oracleModel = process.env.DASHSCOPE_MODEL || 'qwen-turbo'
 const oracleBaseUrl =
-  process.env.DASHSCOPE_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+  process.env.DASHSCOPE_BASE_URL || 'https://api-token.zhongzhiyou.cn/api/v1'
 
 async function callOracleModel({ direction, sign, question }) {
   const signLabel = sign?.label || `第${sign?.id || ''}签`
