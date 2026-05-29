@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import {
   blessingOptions,
@@ -104,6 +104,7 @@ function App() {
     blessingOptions.find((item) => item.id === tagProfile.blessingType) || blessingOptions[1]
   const touchStartY = useRef(null)
   const audioContextRef = useRef(null)
+  const chatLogRef = useRef(null)
 
   const [screen, setScreen] = useState('landing')
   const [selectedOption, setSelectedOption] = useState(initialOption)
@@ -114,6 +115,24 @@ function App() {
   const [messages, setMessages] = useState([])
   const [isAskingOracle, setIsAskingOracle] = useState(false)
   const [oracleError, setOracleError] = useState('')
+
+  useEffect(() => {
+    if (screen !== 'chat') {
+      return
+    }
+
+    const chatLog = chatLogRef.current
+    if (!chatLog) {
+      return
+    }
+
+    requestAnimationFrame(() => {
+      chatLog.scrollTo({
+        top: chatLog.scrollHeight,
+        behavior: 'smooth',
+      })
+    })
+  }, [screen, messages, isAskingOracle])
 
   function handleEnterBlessing() {
     setScreen('home')
@@ -468,7 +487,7 @@ function App() {
 
                 {oracleError && <div className="status-banner status-banner-error">{oracleError}</div>}
 
-                <div className="chat-log">
+                <div className="chat-log" ref={chatLogRef}>
                   {messages.map((message, index) => (
                     <div
                       key={`${message.role}-${index}`}
