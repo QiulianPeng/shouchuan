@@ -45,7 +45,7 @@ function createFallbackErrorMessage() {
   return '当前 AI 解签暂不可用，请稍后再试。'
 }
 
-async function* streamOracleReply({ option, sign, question }) {
+async function requestOracleReply({ option, sign, question }) {
   if (!modelEndpoint) {
     throw new Error('missing-model-endpoint')
   }
@@ -69,66 +69,21 @@ async function* streamOracleReply({ option, sign, question }) {
         vision: sign.vision,
       },
       question,
-      stream: true,
     }),
   })
 
   if (!response.ok) {
-    // Non-streaming fallback response
-    if (response.headers.get('content-type')?.includes('application/json')) {
-      const payload = await response.json()
-      const reply = typeof payload?.reply === 'string' ? payload.reply.trim() : ''
-      if (reply) {
-        yield reply
-        return
-      }
-    }
     throw new Error(`model-request-failed:${response.status}`)
   }
 
-  // Check if we got a streaming response
-  const contentType = response.headers.get('content-type') || ''
-  if (!contentType.includes('text/event-stream')) {
-    // Non-streaming fallback
-    const payload = await response.json()
-    const reply = typeof payload?.reply === 'string' ? payload.reply.trim() : ''
-    if (!reply) throw new Error('empty-model-reply')
-    yield reply
-    return
+  const payload = await response.json()
+  const reply = typeof payload?.reply === 'string' ? payload.reply.trim() : ''
+
+  if (!reply) {
+    throw new Error('empty-model-reply')
   }
 
-  const reader = response.body.getReader()
-  const decoder = new TextDecoder()
-  let buffer = ''
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-
-      buffer += decoder.decode(value, { stream: true })
-      const lines = buffer.split('\n')
-      buffer = lines.pop() || ''
-
-      for (const line of lines) {
-        const trimmed = line.trim()
-        if (!trimmed || !trimmed.startsWith('data:')) continue
-
-        const data = trimmed.slice(5).trim()
-        if (data === '[DONE]') return
-
-        try {
-          const parsed = JSON.parse(data)
-          const content = parsed?.choices?.[0]?.delta?.content
-          if (content) yield content
-        } catch {
-          // Skip unparseable lines
-        }
-      }
-    }
-  } finally {
-    reader.releaseLock()
-  }
+  return reply
 }
 
 function App() {
@@ -305,33 +260,16 @@ function App() {
     setOracleError('')
     setIsAskingOracle(true)
 
-    // Add empty AI message placeholder for streaming
-    const aiMsgIndex = messages.length + 1
-    setMessages((current) => [...current, { role: 'ai', text: '' }])
-
     try {
-      const stream = streamOracleReply({
+      const reply = await requestOracleReply({
         option: selectedOption,
         sign: currentSign,
         question: content,
       })
 
-      for await (const chunk of stream) {
-        setMessages((current) => {
-          const next = [...current]
-          next[aiMsgIndex] = { role: 'ai', text: next[aiMsgIndex].text + chunk }
-          return next
-        })
-      }
+      setMessages((current) => [...current, { role: 'ai', text: reply }])
     } catch (err) {
-      setMessages((current) => {
-        const next = [...current]
-        if (next[aiMsgIndex]?.text === '') {
-          next[aiMsgIndex] = { role: 'ai', text: createFallbackErrorMessage() + ' (' + (err?.message || '未知错误') + ')' }
-        }
-        return next
-      })
-      setOracleError(createFallbackErrorMessage())
+      setOracleError(createFallbackErrorMessage() + ' (' + (err?.message || '未知错误') + ')')
     } finally {
       setIsAskingOracle(false)
     }
