@@ -7,26 +7,14 @@ import {
   quickQuestions,
 } from './data/fortuneSigns'
 
-const bambooSticks = [
-  { left: 18, top: 22, height: 84, tilt: -12, delay: 0 },
-  { left: 27, top: 26, height: 78, tilt: -7, delay: 0.04 },
-  { left: 36, top: 18, height: 88, tilt: -3, delay: 0.08 },
-  { left: 45, top: 24, height: 82, tilt: 2, delay: 0.12 },
-  { left: 54, top: 19, height: 90, tilt: 6, delay: 0.16 },
-  { left: 63, top: 27, height: 76, tilt: 11, delay: 0.2 },
-  { left: 72, top: 23, height: 86, tilt: -10, delay: 0.24 },
-  { left: 22, top: 54, height: 78, tilt: 7, delay: 0.1 },
-  { left: 34, top: 58, height: 72, tilt: -5, delay: 0.14 },
-  { left: 46, top: 50, height: 88, tilt: 4, delay: 0.18 },
-  { left: 58, top: 57, height: 74, tilt: -8, delay: 0.22 },
-  { left: 70, top: 52, height: 84, tilt: 9, delay: 0.26 },
-]
-
 const isProduction = import.meta.env.PROD
 const modelEndpoint = isProduction
   ? '/api/fortune'
   : import.meta.env.VITE_ORACLE_MODEL_URL?.trim() || ''
 const modelKey = isProduction ? '' : import.meta.env.VITE_ORACLE_MODEL_KEY?.trim() || ''
+const BAMBOO_SHAKE_MS = 1500
+const SIGN_SLIDE_MS = 1700
+const SIGN_HOLD_MS = 1000
 
 function parseTagProfile() {
   if (typeof window === 'undefined') {
@@ -244,19 +232,16 @@ function App() {
 
     window.setTimeout(() => {
       setDrawnSign(sign)
-    }, 820)
+      setIsDrawing(false)
+    }, BAMBOO_SHAKE_MS)
 
     window.setTimeout(() => {
       setCurrentSign(sign)
       setOracleError('')
       setMessages([{ role: 'ai', text: createIntroMessage(sign, selectedOption) }])
       setScreen('result')
-    }, 1520)
-
-    window.setTimeout(() => {
-      setIsDrawing(false)
       setDrawnSign(null)
-    }, 1520)
+    }, BAMBOO_SHAKE_MS + SIGN_SLIDE_MS + SIGN_HOLD_MS)
   }
 
   function handleOpenAiReading() {
@@ -385,21 +370,6 @@ function App() {
                     <div className="bamboo-tube">
                       <div className="bamboo-tube-rim" />
                       <div className="bamboo-tube-body">
-                        {bambooSticks.map((stick, index) => (
-                          <span
-                            key={`${index}-${stick.left}`}
-                            className={`bamboo-stick ${isDrawing ? 'bamboo-stick-shake' : ''} ${
-                              drawnSign && index === 2 ? 'bamboo-stick-fall' : ''
-                            }`}
-                            style={{
-                              left: `${stick.left}%`,
-                              top: `${stick.top}%`,
-                              height: `${stick.height}px`,
-                              '--stick-tilt': `${stick.tilt}deg`,
-                              animationDelay: `${stick.delay}s`,
-                            }}
-                          />
-                        ))}
                         <div className="bamboo-tube-label">求签</div>
                         <div className="bamboo-base-ring bamboo-base-ring-top" />
                         <div className="bamboo-base-ring bamboo-base-ring-bottom" />
@@ -408,7 +378,12 @@ function App() {
 
                     {drawnSign && (
                       <div className="drawn-slip" aria-hidden="true">
-                        <span>{drawnSign.label}</span>
+                        <div className="drawn-slip-paper">
+                          <span className="drawn-slip-level">{drawnSign.level}</span>
+                          <span className="drawn-slip-divider" />
+                          <span className="drawn-slip-index">{drawnSign.label}</span>
+                          <span className="drawn-slip-seal" />
+                        </div>
                       </div>
                     )}
                   </div>
