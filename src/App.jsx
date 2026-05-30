@@ -406,7 +406,15 @@ function App() {
                   >
                     {isDrawing ? '竹筒摇签中...' : drawnSign ? '开启福签' : '诚心抽一签'}
                   </button>
-                  <button type="button" className="ghost-button" onClick={() => setScreen('home')}>
+                  <button
+                    type="button"
+                    className="ghost-button"
+                    onClick={() => {
+                      setDrawnSign(null)
+                      setIsDrawing(false)
+                      setScreen('home')
+                    }}
+                  >
                     返回重选方向
                   </button>
                 </div>
