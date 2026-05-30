@@ -3,9 +3,8 @@ import './App.css'
 import {
   blessingOptions,
   demoTagFallback,
-  fortuneSignsByOption,
   quickQuestions,
-} from './data/fortuneSigns'
+} from './data/fortuneConfig'
 
 const isProduction = import.meta.env.PROD
 const modelEndpoint = isProduction
@@ -169,6 +168,13 @@ function App() {
   const touchStartY = useRef(null)
   const audioContextRef = useRef(null)
   const chatLogRef = useRef(null)
+  const fortuneSignsRef = useRef(null)
+
+  async function ensureSignDataLoaded() {
+    if (fortuneSignsRef.current) return
+    const mod = await import('./data/fortuneSignsData')
+    fortuneSignsRef.current = mod.fortuneSignsByOption
+  }
 
   const [screen, setScreen] = useState('landing')
   const [selectedOption, setSelectedOption] = useState(initialOption)
@@ -200,6 +206,7 @@ function App() {
 
   function handleEnterBlessing() {
     setScreen('home')
+    ensureSignDataLoaded()
   }
 
   function playBambooRattle() {
@@ -291,7 +298,8 @@ function App() {
   }
 
   function pickRandomSign(optionId) {
-    const signPool = fortuneSignsByOption[optionId] || fortuneSignsByOption.career
+    const signMap = fortuneSignsRef.current || {}
+    const signPool = signMap[optionId] || signMap.career || []
     return signPool[Math.floor(Math.random() * signPool.length)]
   }
 
@@ -408,7 +416,7 @@ function App() {
               >
                 <img
                   className="landing-image landing-image-full"
-                  src="/底图.jpg"
+                  src="/底图.webp"
                   alt="今日祈福封面"
                 />
                 <div className="landing-scroll-icon" aria-hidden="true">
