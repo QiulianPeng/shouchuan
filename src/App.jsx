@@ -14,7 +14,7 @@ const modelEndpoint = isProduction
 const modelKey = isProduction ? '' : import.meta.env.VITE_ORACLE_MODEL_KEY?.trim() || ''
 const BAMBOO_SHAKE_MS = 1500
 const SIGN_SLIDE_MS = 1700
-const SIGN_HOLD_MS = 1000
+const SIGN_HOLD_MS = 2000
 
 function parseTagProfile() {
   if (typeof window === 'undefined') {
@@ -375,19 +375,26 @@ function App() {
                         <div className="bamboo-base-ring bamboo-base-ring-bottom" />
                       </div>
                     </div>
-
-                    {drawnSign && (
-                      <div className="drawn-slip" aria-hidden="true">
-                        <div className="drawn-slip-paper">
-                          <span className="drawn-slip-level">{drawnSign.level}</span>
-                          <span className="drawn-slip-divider" />
-                          <span className="drawn-slip-index">{drawnSign.label}</span>
-                          <span className="drawn-slip-seal" />
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </section>
+
+                {drawnSign && (
+                  <div className="drawn-slip-overlay" aria-hidden="true">
+                    <div className="drawn-slip">
+                      <span className="slip-tassel" />
+                      <div className="slip-header">
+                        <span className="slip-header-text">{selectedOption.name}</span>
+                      </div>
+                      <div className="slip-body">
+                        <div className="slip-level">{drawnSign.level}</div>
+                      </div>
+                      <div className="slip-footer">
+                        <span className="slip-seal" />
+                        <span className="slip-number">{drawnSign.label}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="action-stack draw-action-stack">
                   <button

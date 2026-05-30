@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Noto+Serif+SC:wght@500;700;900&display=swap');
 
 :root {
   --page-bg: oklch(0.19 0.024 35);
@@ -370,8 +369,10 @@ button {
 }
 
 .draw-screen {
+  position: relative;
   justify-content: flex-start;
   padding-top: 12px;
+  overflow: hidden;
   background:
     radial-gradient(circle at 50% 48%, rgba(227, 186, 112, 0.18), transparent 30%),
     linear-gradient(180deg, #fff6e6 0%, #f3dfb7 100%);
@@ -417,7 +418,7 @@ button {
 }
 
 .oracle-vessel-active {
-  animation: none;
+  animation: vesselPulse 0.6s ease-in-out infinite;
 }
 
 .vessel-shadow {
@@ -496,121 +497,155 @@ button {
   bottom: 14px;
 }
 
-.drawn-slip {
-  --slip-landing-y: 86px;
-  position: absolute;
-  left: 50%;
-  top: 222px;
-  z-index: 6;
-  width: 83px;
-  height: 168px;
-  transform: translate(-50%, -96px);
-  transform-origin: center top;
-  animation: slipDrop 1.7s cubic-bezier(0.18, 0.84, 0.24, 1) forwards;
-  pointer-events: none;
-}
-
-.drawn-slip::before {
-  content: '';
+.drawn-slip-overlay {
   position: absolute;
   inset: 0;
-  border-radius: 12px;
-  background:
-    radial-gradient(circle at 50% 18%, rgba(255, 252, 244, 0.92), transparent 22%),
-    linear-gradient(180deg, rgba(250, 235, 206, 0.99) 0%, rgba(244, 220, 177, 0.98) 52%, rgba(233, 201, 152, 0.98) 100%);
-  border: 1px solid rgba(167, 116, 59, 0.24);
-  box-shadow:
-    0 13px 24px rgba(95, 57, 25, 0.18),
-    inset 0 0 0 1px rgba(255, 250, 239, 0.5);
+  z-index: 20;
+  pointer-events: none;
+  overflow: hidden;
 }
 
-.drawn-slip::after {
-  content: '';
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  transform: translateX(-50%);
-  background: linear-gradient(180deg, rgba(226, 198, 157, 0.95) 0%, rgba(197, 158, 102, 0.95) 100%);
-  box-shadow: 0 0 0 4px rgba(245, 222, 189, 0.25);
-}
-
-.drawn-slip-paper::before,
-.drawn-slip-paper::after {
-  content: '';
+.drawn-slip {
   position: absolute;
   left: 50%;
-  width: calc(100% + 14px);
-  height: 24px;
-  border-radius: 999px;
-  transform: translateX(-50%);
-  border: 1px solid rgba(207, 162, 104, 0.4);
-  opacity: 0.55;
+  top: 22%;
+  width: 80px;
+  transform: translate(-50%, -130%) rotate(-22deg);
+  transform-origin: center top;
+  animation: slipDiagonalDrop 1.7s cubic-bezier(0.22, 0.61, 0.18, 1) forwards;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(0 10px 18px rgba(60, 20, 8, 0.28));
 }
 
-.drawn-slip-paper::before {
-  top: -7px;
-  clip-path: polygon(8% 100%, 8% 48%, 16% 0, 84% 0, 92% 48%, 92% 100%);
-}
-
-.drawn-slip-paper::after {
-  bottom: -9px;
-  clip-path: polygon(8% 0, 8% 52%, 16% 100%, 84% 100%, 92% 52%, 92% 0);
-}
-
-.drawn-slip-paper {
-  position: absolute;
-  inset: 12px 8px 11px;
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: 7px;
-  padding-top: 8px;
-}
-
-.drawn-slip-index,
-.drawn-slip-level,
-.drawn-slip-divider,
-.drawn-slip-seal {
+/* ---- 挂绳 / 穗子 ---- */
+.slip-tassel {
   display: block;
-  position: relative;
-  z-index: 1;
+  width: 2px;
+  height: 18px;
+  background: linear-gradient(180deg, #c9a45c 0%, #a07840 40%, #c9a45c 100%);
+  border-radius: 1px;
+  flex-shrink: 0;
+  margin-bottom: -1px;
 }
 
-.drawn-slip-index {
-  font-size: 0.43rem;
-  letter-spacing: 0.12em;
-  color: rgba(106, 71, 38, 0.74);
-}
-
-.drawn-slip-divider {
-  width: 28px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(154, 103, 52, 0.5) 20%, rgba(154, 103, 52, 0.5) 80%, transparent 100%);
-}
-
-.drawn-slip-level {
-  font-family: 'Noto Serif SC', serif;
-  font-size: 1.18rem;
-  font-weight: 700;
-  line-height: 1.14;
-  letter-spacing: 0.04em;
-  color: #6e3b1d;
+/* ---- 顶部 ---- */
+.slip-header {
+  width: 100%;
+  padding: 10px 6px 8px;
+  background: linear-gradient(180deg, #5c3018 0%, #3d1e0e 100%);
+  border-radius: 6px 6px 0 0;
   text-align: center;
+  border: 1.5px solid #c9a45c;
+  border-bottom: none;
+  position: relative;
 }
 
-.drawn-slip-seal {
-  width: 15px;
-  height: 15px;
-  border-radius: 999px;
+.slip-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 4px;
+  right: 4px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201, 164, 92, 0.5), transparent);
+}
+
+.slip-header-text {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #f7d28b;
+  letter-spacing: 0.15em;
+}
+
+/* ---- 白色主体 ---- */
+.slip-body {
+  width: 100%;
+  min-height: 100px;
+  padding: 16px 8px;
   background:
-    radial-gradient(circle at 30% 30%, rgba(220, 112, 78, 0.26), transparent 38%),
-    linear-gradient(180deg, rgba(156, 55, 28, 0.9) 0%, rgba(117, 34, 18, 0.95) 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 210, 197, 0.24),
-    0 6px 12px rgba(102, 36, 18, 0.18);
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 24px,
+      rgba(180, 140, 100, 0.06) 24px,
+      rgba(180, 140, 100, 0.06) 25px
+    ),
+    linear-gradient(180deg, #fdf8ef 0%, #f7ecd5 40%, #f2e3c6 100%);
+  border-left: 1.5px solid #c9a45c;
+  border-right: 1.5px solid #c9a45c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slip-level {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 1.55rem;
+  font-weight: 900;
+  color: #3c1a08;
+  writing-mode: vertical-rl;
+  letter-spacing: 0.18em;
+  line-height: 1;
+}
+
+/* ---- 底部 ---- */
+.slip-footer {
+  width: 100%;
+  padding: 12px 6px 14px;
+  background: linear-gradient(180deg, #5c3018 0%, #3d1e0e 100%);
+  border-radius: 0 0 6px 6px;
+  border: 1.5px solid #c9a45c;
+  border-top: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.slip-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 4px;
+  right: 4px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201, 164, 92, 0.5), transparent);
+}
+
+.slip-seal {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(120, 60, 30, 0.92) 0%, rgba(80, 35, 15, 0.95) 100%);
+  border: 1px solid rgba(201, 164, 92, 0.35);
+  position: relative;
+}
+
+.slip-seal::after {
+  content: '福';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 0.52rem;
+  font-weight: 900;
+  color: rgba(220, 185, 120, 0.8);
+  transform: rotate(-15deg);
+}
+
+.slip-number {
+  font-size: 0.52rem;
+  font-weight: 700;
+  color: #f7d28b;
+  letter-spacing: 0.06em;
 }
 
 .draw-action-stack {
@@ -850,23 +885,28 @@ button {
   }
 }
 
-@keyframes slipDrop {
+@keyframes slipDiagonalDrop {
   0% {
-    transform: translate(-50%, -96px);
+    transform: translate(-50%, -120%) rotate(-18deg);
     opacity: 0;
   }
 
-  18% {
+  8% {
     opacity: 1;
   }
 
-  76% {
-    transform: translate(-50%, var(--slip-landing-y));
+  55% {
+    transform: translate(-30%, 60%) rotate(6deg);
+    opacity: 1;
+  }
+
+  72% {
+    transform: translate(-25%, 62%) rotate(-2deg);
     opacity: 1;
   }
 
   100% {
-    transform: translate(-50%, var(--slip-landing-y));
+    transform: translate(-28%, 62%) rotate(-3deg);
     opacity: 1;
   }
 }
@@ -1097,45 +1137,60 @@ button {
     top: 16px;
   }
 
+  .drawn-slip-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
   .drawn-slip {
-    --slip-landing-y: 60px;
-    top: 250px;
-    width: 84px;
-    height: 170px;
+    width: 72px;
+    top: 18%;
   }
 
-  .drawn-slip::before {
-    border-radius: 16px;
-  }
-
-  .drawn-slip::after {
-    top: 10px;
-    width: 10px;
-    height: 10px;
-  }
-
-  .drawn-slip-paper {
-    inset: 12px 9px 11px;
-    gap: 6px;
-    padding-top: 8px;
-  }
-
-  .drawn-slip-level {
-    font-size: 1.2rem;
-  }
-
-  .drawn-slip-index {
-    font-size: 0.44rem;
-    letter-spacing: 0.09em;
-  }
-
-  .drawn-slip-divider {
-    width: 26px;
-  }
-
-  .drawn-slip-seal {
-    width: 14px;
+  .slip-tassel {
+    width: 2px;
     height: 14px;
+  }
+
+  .slip-header {
+    padding: 8px 5px 6px;
+    border-radius: 5px 5px 0 0;
+  }
+
+  .slip-header-text {
+    font-size: 0.65rem;
+  }
+
+  .slip-body {
+    min-height: 90px;
+    padding: 14px 6px;
+  }
+
+  .slip-level {
+    font-size: 1.35rem;
+    letter-spacing: 0.14em;
+  }
+
+  .slip-footer {
+    padding: 10px 5px 12px;
+    border-radius: 0 0 5px 5px;
+    gap: 6px;
+  }
+
+  .slip-seal {
+    width: 18px;
+    height: 18px;
+  }
+
+  .slip-seal::after {
+    font-size: 0.45rem;
+  }
+
+  .slip-number {
+    font-size: 0.48rem;
   }
 
   /* ---- 签文结果 ---- */
