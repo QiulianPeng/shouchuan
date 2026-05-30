@@ -45,7 +45,7 @@ function createFallbackErrorMessage() {
   return '当前 AI 解签暂不可用，请稍后再试。'
 }
 
-async function requestOracleReply({ option, sign, question }) {
+async function* streamOracleReply({ option, sign, question }) {
   if (!modelEndpoint) {
     throw new Error('missing-model-endpoint')
   }
@@ -69,21 +69,97 @@ async function requestOracleReply({ option, sign, question }) {
         vision: sign.vision,
       },
       question,
+      stream: true,
     }),
   })
 
   if (!response.ok) {
+    // Non-streaming fallback response
+    if (response.headers.get('content-type')?.includes('application/json')) {
+      const payload = await response.json()
+      const reply = typeof payload?.reply === 'string' ? payload.reply.trim() : ''
+      if (reply) {
+        yield reply
+        return
+      }
+    }
     throw new Error(`model-request-failed:${response.status}`)
   }
 
-  const payload = await response.json()
-  const reply = typeof payload?.reply === 'string' ? payload.reply.trim() : ''
-
-  if (!reply) {
-    throw new Error('empty-model-reply')
+  const contentType = response.headers.get('content-type') || ''
+  if (!contentType.includes('text/event-stream')) {
+    // Non-streaming fallback
+    const payload = await response.json()
+    const reply = typeof payload?.reply === 'string' ? payload.reply.trim() : ''
+    if (!reply) throw new Error('empty-model-reply')
+    yield reply
+    return
   }
 
-  return reply
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  const TYPING_DELAY_MS = 40
+
+  // Collect all incoming chars into a queue, drain with typing rhythm
+  const charQueue = []
+  let reading = true
+
+  // Background reader: push every char into queue
+  const readPromise = (async () => {
+    try {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          const trimmed = line.trim()
+          if (!trimmed || !trimmed.startsWith('data:')) continue
+
+          const data = trimmed.slice(5).trim()
+          if (data === '[DONE]') return
+
+          try {
+            const parsed = JSON.parse(data)
+            const content = parsed?.choices?.[0]?.delta?.content
+            if (content) {
+              for (const ch of content) {
+                charQueue.push(ch)
+              }
+            }
+          } catch {
+            // Skip unparseable lines
+          }
+        }
+      }
+    } finally {
+      reading = false
+      reader.releaseLock()
+    }
+  })()
+
+  // Drain queue with typing delay
+  while (reading || charQueue.length > 0) {
+    if (charQueue.length > 0) {
+      // Yield 1-3 chars at a time for natural rhythm
+      const count = Math.min(1 + Math.floor(Math.random() * 3), charQueue.length)
+      let chunk = ''
+      for (let i = 0; i < count; i++) {
+        chunk += charQueue.shift()
+      }
+      yield chunk
+      await new Promise((r) => setTimeout(r, TYPING_DELAY_MS))
+    } else {
+      // Wait for more data
+      await new Promise((r) => setTimeout(r, 30))
+    }
+  }
+
+  await readPromise
 }
 
 function App() {
@@ -262,17 +338,38 @@ function App() {
     setIsAskingOracle(true)
 
     try {
-      const reply = await requestOracleReply({
+      const stream = streamOracleReply({
         option: selectedOption,
         sign: currentSign,
         question: content,
       })
 
-      setMessages((current) => [...current, { role: 'ai', text: reply }])
+      let firstChunk = true
+      for await (const chunk of stream) {
+        if (firstChunk) {
+          firstChunk = false
+          setIsAskingOracle(false)
+          setMessages((current) => [...current, { role: 'ai', text: chunk }])
+        } else {
+          setMessages((current) => {
+            const next = [...current]
+            const last = next[next.length - 1]
+            next[next.length - 1] = { role: 'ai', text: last.text + chunk }
+            return next
+          })
+        }
+      }
+
+      // If stream produced no content chunks, show fallback
+      if (firstChunk) {
+        setIsAskingOracle(false)
+        setMessages((current) => [...current, { role: 'ai', text: createFallbackErrorMessage() }])
+        setOracleError(createFallbackErrorMessage())
+      }
     } catch (err) {
-      setOracleError(createFallbackErrorMessage() + ' (' + (err?.message || '未知错误') + ')')
-    } finally {
       setIsAskingOracle(false)
+      setMessages((current) => [...current, { role: 'ai', text: createFallbackErrorMessage() + ' (' + (err?.message || '未知错误') + ')' }])
+      setOracleError(createFallbackErrorMessage())
     }
   }
 
