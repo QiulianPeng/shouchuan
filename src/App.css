@@ -64,7 +64,7 @@ button {
 .hero-block h2,
 .sign-header h2 {
   margin: 0;
-  font-family: 'Noto Serif SC', serif;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
 }
 
 .topbar-badge,
@@ -122,7 +122,7 @@ button {
 
 .card-topbar h1 {
   margin: 8px 0 0;
-  font-family: 'Noto Serif SC', serif;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
   font-size: 2rem;
 }
 
@@ -298,7 +298,7 @@ button {
   margin: 0 auto 14px;
   border-radius: 18px;
   background: rgba(121, 87, 52, 0.1);
-  font-family: 'Noto Serif SC', serif;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
   font-size: 1.15rem;
   font-weight: 800;
   color: var(--accent-deep);
@@ -310,7 +310,7 @@ button {
 }
 
 .blessing-card strong {
-  font-family: 'Noto Serif SC', serif;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
   font-size: 1.22rem;
 }
 
@@ -387,7 +387,7 @@ button {
 
 .draw-heading h2 {
   margin: 0;
-  font-family: 'Noto Serif SC', serif;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
   font-size: 2.02rem;
   color: #382116;
 }
@@ -477,7 +477,7 @@ button {
   place-items: center;
   border-radius: 28px;
   transform: translate(-50%, -50%);
-  font-family: 'Noto Serif SC', serif;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
   font-size: 2rem;
   color: #f7d28b;
   background:
@@ -554,7 +554,7 @@ button {
 }
 
 .slip-header-text {
-  font-family: 'Noto Serif SC', serif;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
   font-size: 0.72rem;
   font-weight: 900;
   color: #f7d28b;
@@ -583,7 +583,7 @@ button {
 }
 
 .slip-level {
-  font-family: 'Noto Serif SC', serif;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
   font-size: 1.55rem;
   font-weight: 900;
   color: #3c1a08;
@@ -634,7 +634,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Noto Serif SC', serif;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
   font-size: 0.52rem;
   font-weight: 900;
   color: rgba(220, 185, 120, 0.8);
@@ -693,7 +693,7 @@ button {
   border-radius: 28px;
   background: linear-gradient(180deg, rgba(80, 39, 21, 0.98) 0%, rgba(54, 28, 15, 0.96) 100%);
   color: #ffe8bb;
-  font-family: 'Noto Serif SC', serif;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
   font-size: 1.45rem;
   line-height: 1.9;
 }
@@ -845,7 +845,7 @@ button {
 
 .consent-dialog h2 {
   margin: 12px 0 0;
-  font-family: 'Noto Serif SC', serif;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
   font-size: 1.9rem;
   line-height: 1.2;
 }
