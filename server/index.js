@@ -299,6 +299,81 @@ const server = http.createServer(async (request, response) => {
       return
     }
 
+    const signLabel = sign?.label || `第${sign?.id || ''}签`
+    const signLevel = sign?.level || ''
+    const signPoem = sign?.poem || ''
+    const signSummary = sign?.summary || ''
+    const signVision = sign?.vision || ''
+
+    const systemPrompt = `你是一位温和而有智慧的签文解读者，专为用户解读求签结果。你会结合签文的方向、签诗、签意，用真诚、平实的语言回答用户的问题。回复控制在 150 字以内，语气亲切自然，不用客套开头，直接回答问题。`
+    const userMessage = `我求了一支「${direction}」方向的签。\n签文：${signLabel} · ${signLevel}\n签诗：${signPoem}\n签意：${signSummary}\n愿景：${signVision}\n\n我的问题是：${question}`
+
+    const useStream = body.stream === true
+
+    if (useStream) {
+      let upstream
+      try {
+        upstream = await fetch(`${oracleBaseUrl}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${oracleApiKey}`,
+          },
+          body: JSON.stringify({
+            model: oracleModel,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userMessage },
+            ],
+            max_tokens: 300,
+            temperature: 0.8,
+            stream: true,
+          }),
+        })
+      } catch (err) {
+        console.error('[oracle] upstream fetch error:', err)
+        sendJson(response, 200, {
+          reply: `这支${direction}签（${signLabel}·${signLevel}）想提醒你：${signSummary || ''}（当前 AI 解签暂不可用）`,
+        })
+        return
+      }
+
+      if (!upstream.ok) {
+        const errorText = await upstream.text().catch(() => '')
+        console.error(`[oracle] upstream error status=${upstream.status} body=${errorText}`)
+        sendJson(response, 200, {
+          reply: `这支${direction}签（${signLabel}·${signLevel}）想提醒你：${signSummary || ''}（当前 AI 解签暂不可用）`,
+        })
+        return
+      }
+
+      response.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      })
+
+      const reader = upstream.body.getReader()
+      const decoder = new TextDecoder()
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          response.write(decoder.decode(value, { stream: true }))
+        }
+      } catch (err) {
+        console.error('[oracle] stream read error:', err)
+      } finally {
+        reader.releaseLock()
+        response.end()
+      }
+      return
+    }
+
     try {
       const reply = await callOracleModel({ direction, sign, question })
       sendJson(response, 200, { ok: true, reply })
