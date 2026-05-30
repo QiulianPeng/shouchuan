@@ -234,14 +234,15 @@ function App() {
       setDrawnSign(sign)
       setIsDrawing(false)
     }, BAMBOO_SHAKE_MS)
+  }
 
-    window.setTimeout(() => {
-      setCurrentSign(sign)
-      setOracleError('')
-      setMessages([{ role: 'ai', text: createIntroMessage(sign, selectedOption) }])
-      setScreen('result')
-      setDrawnSign(null)
-    }, BAMBOO_SHAKE_MS + SIGN_SLIDE_MS + SIGN_HOLD_MS)
+  function handleOpenSign() {
+    if (!drawnSign) return
+    setCurrentSign(drawnSign)
+    setOracleError('')
+    setMessages([{ role: 'ai', text: createIntroMessage(drawnSign, selectedOption) }])
+    setScreen('result')
+    setDrawnSign(null)
   }
 
   function handleOpenAiReading() {
@@ -400,10 +401,10 @@ function App() {
                   <button
                     type="button"
                     className="primary-button"
-                    onClick={handleDrawSign}
+                    onClick={drawnSign ? handleOpenSign : handleDrawSign}
                     disabled={isDrawing}
                   >
-                    {isDrawing ? '竹筒摇签中...' : '诚心抽一签'}
+                    {isDrawing ? '竹筒摇签中...' : drawnSign ? '开启福签' : '诚心抽一签'}
                   </button>
                   <button type="button" className="ghost-button" onClick={() => setScreen('home')}>
                     返回重选方向
