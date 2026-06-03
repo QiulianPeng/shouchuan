@@ -44,6 +44,15 @@ function createFallbackErrorMessage() {
   return '当前 AI 解签暂不可用，请稍后再试。'
 }
 
+function SupportFooter() {
+  return (
+    <footer className="support-footer" aria-label="技术支持">
+      <span>中智游×技术支持</span>
+      <span>13967446372</span>
+    </footer>
+  )
+}
+
 async function* streamOracleReply({ option, sign, question }) {
   if (!modelEndpoint) {
     throw new Error('missing-model-endpoint')
@@ -459,6 +468,8 @@ function App() {
                 <button type="button" className="primary-button" onClick={() => setScreen('draw')}>
                   为「{selectedOption.name}」抽一签
                 </button>
+
+                <SupportFooter />
               </div>
             )}
 
@@ -523,6 +534,8 @@ function App() {
                     返回重选方向
                   </button>
                 </div>
+
+                <SupportFooter />
               </div>
             )}
 
@@ -554,6 +567,8 @@ function App() {
                     返回封面
                   </button>
                 </div>
+
+                <SupportFooter />
               </div>
             )}
 

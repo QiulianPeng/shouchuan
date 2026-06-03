@@ -664,6 +664,22 @@ button {
   color: var(--accent-deep);
 }
 
+.support-footer {
+  display: grid;
+  gap: 4px;
+  margin-top: 18px;
+  padding-bottom: 2px;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: rgba(87, 59, 42, 0.58);
+}
+
+.support-footer span {
+  display: block;
+}
+
 .sign-header {
   padding: 6px 0 0;
 }
