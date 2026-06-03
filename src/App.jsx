@@ -484,8 +484,8 @@ function App() {
               <div className="screen draw-screen">
                 <section className="draw-heading">
                   <span className="hero-kicker">竹筒求签</span>
-                  <h2>静心三秒，再摇一摇竹筒</h2>
-                  <p>为「{selectedOption.name}」默念所求，轻触竹筒，等一支签缓缓落出。</p>
+                  <h2>静心三秒，诚心抽一签</h2>
+                  <p>为「{selectedOption.name}」默念所求，轻触下方按钮，等一支签缓缓落出。</p>
                 </section>
 
                 <section className="draw-stage-panel">
