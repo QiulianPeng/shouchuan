@@ -44,9 +44,9 @@ function createFallbackErrorMessage() {
   return '当前 AI 解签暂不可用，请稍后再试。'
 }
 
-function SupportFooter() {
+function SupportFooter({ className = '' }) {
   return (
-    <footer className="support-footer" aria-label="技术支持">
+    <footer className={`support-footer ${className}`.trim()} aria-label="技术支持">
       <span>中智游×技术支持</span>
       <span>13967446372</span>
     </footer>
@@ -306,6 +306,13 @@ function App() {
     touchStartY.current = null
   }
 
+  function handleLandingKeyDown(event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      handleEnterBlessing()
+    }
+  }
+
   function pickRandomSign(optionId) {
     const signMap = fortuneSignsRef.current || {}
     const signPool = signMap[optionId] || signMap.career || []
@@ -420,8 +427,13 @@ function App() {
             {screen === 'landing' && (
               <div
                 className="screen screen-landing scroll-entry-screen"
+                role="button"
+                tabIndex={0}
+                onClick={handleEnterBlessing}
+                onKeyDown={handleLandingKeyDown}
                 onTouchStart={handleLandingTouchStart}
                 onTouchEnd={handleLandingTouchEnd}
+                aria-label="进入今日祈福"
               >
                 <img
                   className="landing-image landing-image-full"
@@ -433,12 +445,7 @@ function App() {
                     <path d="M8 14 L12 8 L16 14 M8 10 L12 4 L16 10 M8 6 L12 0 L16 6" />
                   </svg>
                 </div>
-                <button
-                  type="button"
-                  className="landing-entry-hitbox"
-                  onClick={handleEnterBlessing}
-                  aria-label="进入今日祈福"
-                />
+                <SupportFooter className="landing-support-footer" />
               </div>
             )}
 
