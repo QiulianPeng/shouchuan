@@ -534,8 +534,6 @@ function App() {
                     返回重选方向
                   </button>
                 </div>
-
-                <SupportFooter />
               </div>
             )}
 
@@ -567,8 +565,6 @@ function App() {
                     返回封面
                   </button>
                 </div>
-
-                <SupportFooter />
               </div>
             )}
 
